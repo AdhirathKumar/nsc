@@ -1,23 +1,17 @@
-from cryptography.hazmat.primitives.asymmetric import dsa
-from cryptography.hazmat.primitives import hashes
+from Cryptodome.Signature import DSS
+from Cryptodome.PublicKey import DSA
+from Cryptodome.Hash import SHA256
 
-# Key generation
-private_key = dsa.generate_private_key(key_size=1024)
-public_key = private_key.public_key()
+# Generate a DSA key pair
+key = DSA.generate(2048)
 
-# Message hashing
-message = b"Hello, world!"
-digest = hashes.SHA256()
-hasher = hashes.Hash(digest)
-hasher.update(message)
-hashed_message = hasher.finalize()
+# Compute the SHA-256 hash of the message
+message = b"Hello, World!"
+hash_obj = SHA256.new(message)
+hash_value = hash_obj.digest()
 
-# Signature generation
-signature = private_key.sign(hashed_message, algorithm=hashes.SHA256())
+# Use the private key to generate a digital signature
+signer = DSS.new(key, 'fips-186-3')
+signature = signer.sign(hash_obj)
 
-# Signature verification
-try:
-    public_key.verify(signature, hashed_message, algorithm=hashes.SHA256())
-    print("Signature is valid!")
-except:
-    print("Invalid signature.")
+print("Digital signature:", signature.hex())
